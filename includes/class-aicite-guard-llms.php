@@ -1,0 +1,423 @@
+<?php
+/**
+ * Generate and serve llms.txt / llms-full.txt.
+ *
+ * @package Aicite_Guard
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/**
+ * Rule-based llms.txt generator (no paid AI required).
+ */
+class Aicite_Guard_Llms {
+
+	const QUERY_VAR = 'aicite_guard_llms';
+
+	/**
+	 * Register pretty permalinks for the AI files.
+	 *
+	 * @return void
+	 */
+	public static function add_rewrite_rules() {
+		add_rewrite_rule( '^llms\.txt$', 'index.php?' . self::QUERY_VAR . '=basic', 'top' );
+		add_rewrite_rule( '^llms-full\.txt$', 'index.php?' . self::QUERY_VAR . '=full', 'top' );
+	}
+
+	/**
+	 * Register rewrite rules on init.
+	 *
+	 * @return void
+	 */
+	public function register_rewrites() {
+		self::add_rewrite_rules();
+	}
+
+	/**
+	 * Expose the custom query var.
+	 *
+	 * @param string[] $vars Query vars.
+	 * @return string[]
+	 */
+	public function query_vars( $vars ) {
+		$vars[] = self::QUERY_VAR;
+		return $vars;
+	}
+
+	/**
+	 * Serve generated files when requested.
+	 *
+	 * @return void
+	 */
+	public function serve() {
+		$type = get_query_var( self::QUERY_VAR );
+		if ( ! $type ) {
+			$type = self::type_from_request();
+		}
+
+		if ( ! $type || ! Aicite_Guard_Settings::get_path( 'ai_visibility.enabled', true ) ) {
+			return;
+		}
+
+		$content = 'full' === $type ? $this->get_full() : $this->get_basic();
+
+		nocache_headers();
+		header( 'Content-Type: text/plain; charset=utf-8' );
+		header( 'X-Robots-Tag: noindex' );
+		status_header( 200 );
+		echo $content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- plain-text machine file.
+		exit;
+	}
+
+	/**
+	 * Invalidate cached files when relevant content is saved.
+	 *
+	 * @param int     $post_id Post ID.
+	 * @param WP_Post $post    Post object.
+	 * @return void
+	 */
+	public function maybe_invalidate( $post_id, $post ) {
+		if ( wp_is_post_autosave( $post_id ) || wp_is_post_revision( $post_id ) ) {
+			return;
+		}
+
+		if ( ! Aicite_Guard_Settings::get_path( 'ai_visibility.auto_update', true ) ) {
+			return;
+		}
+
+		$types = Aicite_Guard_Settings::get_path( 'ai_visibility.post_types', array( 'post', 'page' ) );
+		if ( $post instanceof WP_Post && in_array( $post->post_type, $types, true ) ) {
+			$this->clear_cache();
+		}
+	}
+
+	/**
+	 * Drop cached generated files.
+	 *
+	 * @return void
+	 */
+	public function clear_cache() {
+		delete_option( 'aicite_guard_llms_cache' );
+		delete_option( 'aicite_guard_llms_full_cache' );
+	}
+
+	/**
+	 * Get (and cache) the short llms.txt file.
+	 *
+	 * @param bool $force Force regenerate.
+	 * @return string
+	 */
+	public function get_basic( $force = false ) {
+		if ( ! $force ) {
+			$cached = get_option( 'aicite_guard_llms_cache', '' );
+			if ( is_string( $cached ) && '' !== $cached ) {
+				return $cached;
+			}
+		}
+
+		$content = $this->build( false );
+		update_option( 'aicite_guard_llms_cache', $content, false );
+		update_option( 'aicite_guard_llms_generated_at', time(), false );
+
+		return $content;
+	}
+
+	/**
+	 * Get (and cache) the detailed llms-full.txt file.
+	 *
+	 * @param bool $force Force regenerate.
+	 * @return string
+	 */
+	public function get_full( $force = false ) {
+		if ( ! $force ) {
+			$cached = get_option( 'aicite_guard_llms_full_cache', '' );
+			if ( is_string( $cached ) && '' !== $cached ) {
+				return $cached;
+			}
+		}
+
+		$content = $this->build( true );
+		update_option( 'aicite_guard_llms_full_cache', $content, false );
+		update_option( 'aicite_guard_llms_generated_at', time(), false );
+
+		return $content;
+	}
+
+	/**
+	 * Rebuild both files.
+	 *
+	 * @return array{basic:string,full:string,generated_at:int}
+	 */
+	public function regenerate() {
+		$basic = $this->get_basic( true );
+		$full  = $this->get_full( true );
+
+		return array(
+			'basic'        => $basic,
+			'full'         => $full,
+			'generated_at' => (int) get_option( 'aicite_guard_llms_generated_at', time() ),
+		);
+	}
+
+	/**
+	 * Build file contents from published content.
+	 *
+	 * @param bool $full Whether to include longer excerpts.
+	 * @return string
+	 */
+	private function build( $full ) {
+		$site_name = wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES );
+		$tagline   = wp_specialchars_decode( get_bloginfo( 'description' ), ENT_QUOTES );
+		$home      = home_url( '/' );
+		$types     = Aicite_Guard_Settings::get_path( 'ai_visibility.post_types', array( 'post', 'page' ) );
+		$max       = (int) Aicite_Guard_Settings::get_path( 'ai_visibility.max_items', 50 );
+		$excerpts  = (bool) Aicite_Guard_Settings::get_path( 'ai_visibility.include_excerpts', true );
+
+		$lines   = array();
+		$lines[] = '# ' . $this->plain( $site_name );
+		$lines[] = '';
+
+		if ( $tagline ) {
+			$lines[] = '> ' . $this->plain( $tagline );
+			$lines[] = '';
+		}
+
+		$about = $this->about_blurb();
+		if ( $about ) {
+			$lines[] = $about;
+			$lines[] = '';
+		}
+
+		$lines[] = sprintf(
+			/* translators: %s: site URL */
+			__( 'This file helps answer engines and AI assistants understand %s. It is generated by AIcite Guard.', 'aicite-guard' ),
+			$home
+		);
+		$lines[] = '';
+
+		$lines[] = '## ' . __( 'Site', 'aicite-guard' );
+		$lines[] = '';
+		$lines[] = '- [' . $this->plain( $site_name ) . '](' . $home . '): ' . ( $tagline ? $this->plain( $tagline ) : __( 'Homepage', 'aicite-guard' ) );
+
+		$contact = $this->guess_contact_url();
+		if ( $contact ) {
+			$lines[] = '- [' . __( 'Contact', 'aicite-guard' ) . '](' . $contact . '): ' . __( 'How to reach the site owner.', 'aicite-guard' );
+		}
+
+		$lines[] = '';
+
+		$grouped = $this->collect_items( $types, $max );
+
+		foreach ( $grouped as $type => $items ) {
+			$object = get_post_type_object( $type );
+			$label  = $object && ! empty( $object->labels->name ) ? $object->labels->name : ucfirst( $type );
+
+			$lines[] = '## ' . $this->plain( $label );
+			$lines[] = '';
+
+			foreach ( $items as $item ) {
+				$summary = $excerpts ? $item['summary'] : '';
+				if ( $full && $item['detail'] ) {
+					$summary = $item['detail'];
+				}
+
+				$line = '- [' . $item['title'] . '](' . $item['url'] . ')';
+				if ( $summary ) {
+					$line .= ': ' . $summary;
+				}
+				$lines[] = $line;
+
+				if ( $full && $item['body'] ) {
+					$lines[] = '';
+					$lines[] = $item['body'];
+					$lines[] = '';
+				}
+			}
+
+			$lines[] = '';
+		}
+
+		if ( ! $full ) {
+			$lines[] = '## ' . __( 'Optional', 'aicite-guard' );
+			$lines[] = '';
+			$lines[] = '- [llms-full.txt](' . home_url( '/llms-full.txt' ) . '): ' . __( 'Longer, page-level summary of the same content.', 'aicite-guard' );
+			$lines[] = '';
+		}
+
+		$lines[] = '## ' . __( 'Policy', 'aicite-guard' );
+		$lines[] = '';
+		$lines[] = __( 'Answer engines may cite this site when attributing facts found here. Training-only scrapers can be restricted via robots.txt rules managed by AIcite Guard.', 'aicite-guard' );
+		$lines[] = '';
+
+		return trim( implode( "\n", $lines ) ) . "\n";
+	}
+
+	/**
+	 * Collect published items grouped by post type.
+	 *
+	 * @param string[] $types Post types.
+	 * @param int      $max   Max items total.
+	 * @return array<string, array<int, array<string, string>>>
+	 */
+	private function collect_items( $types, $max ) {
+		$per_type = max( 3, (int) ceil( $max / max( 1, count( $types ) ) ) );
+		$grouped  = array();
+
+		foreach ( $types as $type ) {
+			$query = new WP_Query(
+				array(
+					'post_type'              => $type,
+					'post_status'            => 'publish',
+					'posts_per_page'         => $per_type,
+					'orderby'                => array(
+						'menu_order' => 'ASC',
+						'date'       => 'DESC',
+					),
+					'no_found_rows'          => true,
+					'update_post_meta_cache' => false,
+					'update_post_term_cache' => false,
+					'ignore_sticky_posts'    => true,
+				)
+			);
+
+			if ( ! $query->have_posts() ) {
+				continue;
+			}
+
+			$grouped[ $type ] = array();
+
+			foreach ( $query->posts as $post ) {
+				$grouped[ $type ][] = $this->format_item( $post );
+			}
+		}
+
+		wp_reset_postdata();
+
+		return $grouped;
+	}
+
+	/**
+	 * Format one content item.
+	 *
+	 * @param WP_Post $post Post.
+	 * @return array<string, string>
+	 */
+	private function format_item( $post ) {
+		$title   = $this->plain( get_the_title( $post ) );
+		$url     = get_permalink( $post );
+		$excerpt = $this->plain( $this->item_excerpt( $post, 28 ) );
+		$detail  = $this->plain( $this->item_excerpt( $post, 80 ) );
+		$body    = $this->plain( $this->item_excerpt( $post, 160 ) );
+
+		return array(
+			'title'   => $title ? $title : __( 'Untitled', 'aicite-guard' ),
+			'url'     => $url ? $url : home_url( '/' ),
+			'summary' => $excerpt,
+			'detail'  => $detail,
+			'body'    => $body,
+		);
+	}
+
+	/**
+	 * Build a clean excerpt without shortcodes or blocks noise.
+	 *
+	 * @param WP_Post $post  Post.
+	 * @param int     $words Word count.
+	 * @return string
+	 */
+	private function item_excerpt( $post, $words ) {
+		$text = $post->post_excerpt;
+		if ( ! $text ) {
+			$text = $post->post_content;
+		}
+
+		$text = strip_shortcodes( $text );
+		if ( function_exists( 'excerpt_remove_blocks' ) ) {
+			$text = excerpt_remove_blocks( $text );
+		}
+		$text = wp_strip_all_tags( $text );
+		$text = preg_replace( '/\s+/', ' ', (string) $text );
+
+		return trim( wp_trim_words( $text, $words, '…' ) );
+	}
+
+	/**
+	 * Homepage-based about sentence.
+	 *
+	 * @return string
+	 */
+	private function about_blurb() {
+		$page_id = (int) get_option( 'page_on_front' );
+		if ( $page_id ) {
+			$post = get_post( $page_id );
+			if ( $post ) {
+				$excerpt = $this->item_excerpt( $post, 40 );
+				if ( $excerpt ) {
+					return $this->plain( $excerpt );
+				}
+			}
+		}
+
+		return '';
+	}
+
+	/**
+	 * Best-effort contact URL.
+	 *
+	 * @return string
+	 */
+	private function guess_contact_url() {
+		$page = get_page_by_path( 'contact' );
+		if ( $page instanceof WP_Post && 'publish' === $page->post_status ) {
+			return get_permalink( $page );
+		}
+
+		$page = get_page_by_path( 'contact-us' );
+		if ( $page instanceof WP_Post && 'publish' === $page->post_status ) {
+			return get_permalink( $page );
+		}
+
+		return '';
+	}
+
+	/**
+	 * Detect llms requests even when rewrite rules are stale.
+	 *
+	 * @return string
+	 */
+	public static function type_from_request() {
+		if ( empty( $_SERVER['REQUEST_URI'] ) ) {
+			return '';
+		}
+
+		$request_uri = sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) );
+		$path        = wp_parse_url( $request_uri, PHP_URL_PATH );
+		$path        = untrailingslashit( (string) $path );
+
+		if ( preg_match( '/\/llms\.txt$/', $path ) ) {
+			return 'basic';
+		}
+
+		if ( preg_match( '/\/llms-full\.txt$/', $path ) ) {
+			return 'full';
+		}
+
+		return '';
+	}
+
+	/**
+	 * Collapse whitespace and decode entities for a text file.
+	 *
+	 * @param string $text Raw text.
+	 * @return string
+	 */
+	private function plain( $text ) {
+		$text = wp_specialchars_decode( (string) $text, ENT_QUOTES );
+		$text = html_entity_decode( $text, ENT_QUOTES, 'UTF-8' );
+		$text = preg_replace( '/\s+/', ' ', $text );
+
+		return trim( (string) $text );
+	}
+}
