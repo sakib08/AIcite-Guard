@@ -1,15 +1,15 @@
-.aicite-guard-a11y {
+.spg-by-ppros-a11y {
 	position: fixed;
 	z-index: 99999;
 	font-family: system-ui, -apple-system, Segoe UI, sans-serif;
 }
 
-.aicite-guard-a11y--bottom-right { right: 16px; bottom: 16px; }
-.aicite-guard-a11y--bottom-left { left: 16px; bottom: 16px; }
-.aicite-guard-a11y--top-right { right: 16px; top: 16px; }
-.aicite-guard-a11y--top-left { left: 16px; top: 16px; }
+.spg-by-ppros-a11y--bottom-right { right: 16px; bottom: 16px; }
+.spg-by-ppros-a11y--bottom-left { left: 16px; bottom: 16px; }
+.spg-by-ppros-a11y--top-right { right: 16px; top: 16px; }
+.spg-by-ppros-a11y--top-left { left: 16px; top: 16px; }
 
-.aicite-guard-a11y__toggle {
+.spg-by-ppros-a11y__toggle {
 	width: 48px;
 	height: 48px;
 	border: 0;
@@ -20,12 +20,12 @@
 	box-shadow: 0 6px 18px rgba(15, 118, 110, 0.28);
 }
 
-.aicite-guard-a11y__icon {
+.spg-by-ppros-a11y__icon {
 	font-weight: 700;
 	font-size: 18px;
 }
 
-.aicite-guard-a11y__panel {
+.spg-by-ppros-a11y__panel {
 	position: absolute;
 	width: 240px;
 	background: #fff;
@@ -36,41 +36,41 @@
 	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
 }
 
-.aicite-guard-a11y--bottom-right .aicite-guard-a11y__panel,
-.aicite-guard-a11y--bottom-left .aicite-guard-a11y__panel {
+.spg-by-ppros-a11y--bottom-right .spg-by-ppros-a11y__panel,
+.spg-by-ppros-a11y--bottom-left .spg-by-ppros-a11y__panel {
 	bottom: 58px;
 }
 
-.aicite-guard-a11y--top-right .aicite-guard-a11y__panel,
-.aicite-guard-a11y--top-left .aicite-guard-a11y__panel {
+.spg-by-ppros-a11y--top-right .spg-by-ppros-a11y__panel,
+.spg-by-ppros-a11y--top-left .spg-by-ppros-a11y__panel {
 	top: 58px;
 }
 
-.aicite-guard-a11y--bottom-right .aicite-guard-a11y__panel,
-.aicite-guard-a11y--top-right .aicite-guard-a11y__panel {
+.spg-by-ppros-a11y--bottom-right .spg-by-ppros-a11y__panel,
+.spg-by-ppros-a11y--top-right .spg-by-ppros-a11y__panel {
 	right: 0;
 }
 
-.aicite-guard-a11y--bottom-left .aicite-guard-a11y__panel,
-.aicite-guard-a11y--top-left .aicite-guard-a11y__panel {
+.spg-by-ppros-a11y--bottom-left .spg-by-ppros-a11y__panel,
+.spg-by-ppros-a11y--top-left .spg-by-ppros-a11y__panel {
 	left: 0;
 }
 
-.aicite-guard-a11y__title {
+.spg-by-ppros-a11y__title {
 	margin: 0 0 10px;
 	font-weight: 700;
 }
 
-.aicite-guard-a11y__row {
+.spg-by-ppros-a11y__row {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
 	margin-bottom: 8px;
 }
 
-.aicite-guard-a11y__btns button,
-.aicite-guard-a11y__opt,
-.aicite-guard-a11y__reset {
+.spg-by-ppros-a11y__btns button,
+.spg-by-ppros-a11y__opt,
+.spg-by-ppros-a11y__reset {
 	border: 1px solid #d4d4d8;
 	background: #f8fafc;
 	border-radius: 8px;
@@ -81,28 +81,28 @@
 	text-align: left;
 }
 
-.aicite-guard-a11y__btns {
+.spg-by-ppros-a11y__btns {
 	display: flex;
 	gap: 6px;
 }
 
-.aicite-guard-a11y__btns button {
+.spg-by-ppros-a11y__btns button {
 	width: auto;
 	margin: 0;
 }
 
-.aicite-guard-a11y__opt.is-on {
+.spg-by-ppros-a11y__opt.is-on {
 	background: #f0fdfa;
 	border-color: #0f766e;
 	color: #0f766e;
 }
 
-.aicite-guard-a11y__foot {
+.spg-by-ppros-a11y__foot {
 	margin: 8px 0 0;
 	font-size: 12px;
 }
 
-.aicite-guard-a11y .screen-reader-text {
+.spg-by-ppros-a11y .screen-reader-text {
 	clip: rect(1px, 1px, 1px, 1px);
 	height: 1px;
 	overflow: hidden;
@@ -111,24 +111,24 @@
 	word-wrap: normal !important;
 }
 
-html.aicite-guard-contrast {
+html.spg-by-ppros-contrast {
 	filter: contrast(1.2);
 }
 
-html.aicite-guard-links a {
+html.spg-by-ppros-links a {
 	text-decoration: underline !important;
 	text-underline-offset: 2px;
 }
 
-html.aicite-guard-spacing {
+html.spg-by-ppros-spacing {
 	letter-spacing: 0.02em;
 	word-spacing: 0.08em;
 	line-height: 1.7;
 }
 
-html.aicite-guard-motion *,
-html.aicite-guard-motion *::before,
-html.aicite-guard-motion *::after {
+html.spg-by-ppros-motion *,
+html.spg-by-ppros-motion *::before,
+html.spg-by-ppros-motion *::after {
 	animation: none !important;
 	transition: none !important;
 }

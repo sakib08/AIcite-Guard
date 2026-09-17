@@ -2,7 +2,7 @@
 /**
  * Fired during plugin deactivation.
  *
- * @package Aicite_Guard
+ * @package Sitepulse_Guard_By_Plugin_Pros
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Deactivation routines.
  */
-class Aicite_Guard_Deactivator {
+class Sitepulse_Guard_By_Plugin_Pros_Deactivator {
 
 	/**
 	 * Flush rewrite rules so /llms.txt no longer resolves here.

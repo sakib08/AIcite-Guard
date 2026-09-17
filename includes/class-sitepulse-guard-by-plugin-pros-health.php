@@ -2,7 +2,7 @@
 /**
  * Site Health Guardian: bloat, conflicts, CWV hints, security surface.
  *
- * @package Aicite_Guard
+ * @package Sitepulse_Guard_By_Plugin_Pros
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Lightweight plugin and site-health overview.
  */
-class Aicite_Guard_Health {
+class Sitepulse_Guard_By_Plugin_Pros_Health {
 
 	/**
 	 * Build and cache a health report.
@@ -22,7 +22,7 @@ class Aicite_Guard_Health {
 	 */
 	public function report( $force = false ) {
 		if ( ! $force ) {
-			$cached = get_transient( 'aicite_guard_health_cache' );
+			$cached = get_transient( 'spg_by_ppros_health_cache' );
 			if ( is_array( $cached ) ) {
 				return $cached;
 			}
@@ -115,10 +115,10 @@ class Aicite_Guard_Health {
 			'calculated'  => time(),
 		);
 
-		set_transient( 'aicite_guard_health_cache', $report, HOUR_IN_SECONDS );
-		update_option( 'aicite_guard_health_report', $report, false );
+		set_transient( 'spg_by_ppros_health_cache', $report, HOUR_IN_SECONDS );
+		update_option( 'spg_by_ppros_health_report', $report, false );
 
-		$scores           = get_option( 'aicite_guard_scores', array() );
+		$scores           = get_option( 'spg_by_ppros_scores', array() );
 		$scores           = is_array( $scores ) ? $scores : array();
 		$scores['health'] = array(
 			'score'      => $score,
@@ -126,7 +126,7 @@ class Aicite_Guard_Health {
 			'summary'    => $report['summary'],
 			'calculated' => time(),
 		);
-		update_option( 'aicite_guard_scores', $scores, false );
+		update_option( 'spg_by_ppros_scores', $scores, false );
 
 		return $report;
 	}
@@ -141,8 +141,8 @@ class Aicite_Guard_Health {
 		$groups = array(
 			array(
 				'id'      => 'seo',
-				'label'   => __( 'Multiple SEO plugins', 'aicite-guard' ),
-				'detail'  => __( 'AIcite Guard works with Yoast and Rank Math, but running two SEO plugins at once often duplicates schema and sitemaps. Keep one as the SEO source of truth.', 'aicite-guard' ),
+				'label'   => __( 'Multiple SEO plugins', 'spg-by-ppros' ),
+				'detail'  => __( 'SitePulse Guard works with Yoast and Rank Math, but running two SEO plugins at once often duplicates schema and sitemaps. Keep one as the SEO source of truth.', 'spg-by-ppros' ),
 				'plugins' => array(
 					'wordpress-seo/wp-seo.php',
 					'seo-by-rank-math/rank-math.php',
@@ -152,8 +152,8 @@ class Aicite_Guard_Health {
 			),
 			array(
 				'id'      => 'cache',
-				'label'   => __( 'Multiple caching plugins', 'aicite-guard' ),
-				'detail'  => __( 'Two page caches can serve stale or broken pages. Keep a single caching plugin.', 'aicite-guard' ),
+				'label'   => __( 'Multiple caching plugins', 'spg-by-ppros' ),
+				'detail'  => __( 'Two page caches can serve stale or broken pages. Keep a single caching plugin.', 'spg-by-ppros' ),
 				'plugins' => array(
 					'litespeed-cache/litespeed-cache.php',
 					'wp-super-cache/wp-cache.php',
@@ -164,8 +164,8 @@ class Aicite_Guard_Health {
 			),
 			array(
 				'id'      => 'security',
-				'label'   => __( 'Multiple security suites', 'aicite-guard' ),
-				'detail'  => __( 'Overlapping firewalls increase load and can lock you out. One well-configured suite is enough.', 'aicite-guard' ),
+				'label'   => __( 'Multiple security suites', 'spg-by-ppros' ),
+				'detail'  => __( 'Overlapping firewalls increase load and can lock you out. One well-configured suite is enough.', 'spg-by-ppros' ),
 				'plugins' => array(
 					'wordfence/wordfence.php',
 					'sucuri-scanner/sucuri.php',
@@ -175,8 +175,8 @@ class Aicite_Guard_Health {
 			),
 			array(
 				'id'      => 'optimize',
-				'label'   => __( 'Multiple asset optimizers', 'aicite-guard' ),
-				'detail'  => __( 'Two minifiers often break CSS/JS. Use one optimizer and test the front end.', 'aicite-guard' ),
+				'label'   => __( 'Multiple asset optimizers', 'spg-by-ppros' ),
+				'detail'  => __( 'Two minifiers often break CSS/JS. Use one optimizer and test the front end.', 'spg-by-ppros' ),
 				'plugins' => array(
 					'autoptimize/autoptimize.php',
 					'litespeed-cache/litespeed-cache.php',
@@ -226,44 +226,44 @@ class Aicite_Guard_Health {
 		if ( $active_count > 25 ) {
 			$hints[] = array(
 				'status' => 'warn',
-				'text'   => __( 'More than 25 active plugins often hurts LCP and INP. Deactivate anything unused.', 'aicite-guard' ),
+				'text'   => __( 'More than 25 active plugins often hurts LCP and INP. Deactivate anything unused.', 'spg-by-ppros' ),
 			);
 		} elseif ( $active_count > 15 ) {
 			$hints[] = array(
 				'status' => 'info',
-				'text'   => __( 'Plugin count is moderate. Review heavy plugins below before adding more.', 'aicite-guard' ),
+				'text'   => __( 'Plugin count is moderate. Review heavy plugins below before adding more.', 'spg-by-ppros' ),
 			);
 		} else {
 			$hints[] = array(
 				'status' => 'ok',
-				'text'   => __( 'Active plugin count is in a healthy range for most sites.', 'aicite-guard' ),
+				'text'   => __( 'Active plugin count is in a healthy range for most sites.', 'spg-by-ppros' ),
 			);
 		}
 
 		if ( $autoload > 1024 * 1024 ) {
 			$hints[] = array(
 				'status' => 'warn',
-				'text'   => __( 'Autoloaded options exceed 1 MB. That delays every page (TTFB). Clean unused options.', 'aicite-guard' ),
+				'text'   => __( 'Autoloaded options exceed 1 MB. That delays every page (TTFB). Clean unused options.', 'spg-by-ppros' ),
 			);
 		} else {
 			$hints[] = array(
 				'status' => 'ok',
-				'text'   => __( 'Autoloaded options are within a reasonable size.', 'aicite-guard' ),
+				'text'   => __( 'Autoloaded options are within a reasonable size.', 'spg-by-ppros' ),
 			);
 		}
 
 		$hints[] = array(
 			'status' => $has_cache ? 'ok' : 'info',
 			'text'   => $has_cache
-				? __( 'A caching plugin is active. That usually helps Largest Contentful Paint.', 'aicite-guard' )
-				: __( 'No caching plugin detected. Page caching is one of the highest-impact CWV wins.', 'aicite-guard' ),
+				? __( 'A caching plugin is active. That usually helps Largest Contentful Paint.', 'spg-by-ppros' )
+				: __( 'No caching plugin detected. Page caching is one of the highest-impact CWV wins.', 'spg-by-ppros' ),
 		);
 
 		$hints[] = array(
 			'status' => $https ? 'ok' : 'warn',
 			'text'   => $https
-				? __( 'HTTPS is on. Browsers can use modern performance features.', 'aicite-guard' )
-				: __( 'Serve the site over HTTPS so browsers do not throttle or warn visitors.', 'aicite-guard' ),
+				? __( 'HTTPS is on. Browsers can use modern performance features.', 'spg-by-ppros' )
+				: __( 'Serve the site over HTTPS so browsers do not throttle or warn visitors.', 'spg-by-ppros' ),
 		);
 
 		return array(
@@ -289,48 +289,48 @@ class Aicite_Guard_Health {
 		if ( $outdated ) {
 			$items[] = array(
 				'status' => 'warn',
-				'title'  => __( 'Plugin updates waiting', 'aicite-guard' ),
+				'title'  => __( 'Plugin updates waiting', 'spg-by-ppros' ),
 				'detail' => sprintf(
 					/* translators: %d: number of plugins */
-					_n( '%d plugin has an update available.', '%d plugins have updates available.', count( $outdated ), 'aicite-guard' ),
+					_n( '%d plugin has an update available.', '%d plugins have updates available.', count( $outdated ), 'spg-by-ppros' ),
 					count( $outdated )
 				),
 			);
 		} else {
 			$items[] = array(
 				'status' => 'ok',
-				'title'  => __( 'No plugin updates queued', 'aicite-guard' ),
-				'detail' => __( 'WordPress does not currently list pending plugin updates.', 'aicite-guard' ),
+				'title'  => __( 'No plugin updates queued', 'spg-by-ppros' ),
+				'detail' => __( 'WordPress does not currently list pending plugin updates.', 'spg-by-ppros' ),
 			);
 		}
 
 		if ( $stale ) {
 			$items[] = array(
 				'status' => 'warn',
-				'title'  => __( 'Possibly abandoned plugins', 'aicite-guard' ),
-				'detail' => __( 'Some active plugins have not changed in about two years. Treat them as a higher risk and look for maintained alternatives.', 'aicite-guard' ),
+				'title'  => __( 'Possibly abandoned plugins', 'spg-by-ppros' ),
+				'detail' => __( 'Some active plugins have not changed in about two years. Treat them as a higher risk and look for maintained alternatives.', 'spg-by-ppros' ),
 			);
 		}
 
 		if ( defined( 'DISALLOW_FILE_EDIT' ) && DISALLOW_FILE_EDIT ) {
 			$items[] = array(
 				'status' => 'ok',
-				'title'  => __( 'Theme/plugin file editor is disabled', 'aicite-guard' ),
-				'detail' => __( 'DISALLOW_FILE_EDIT is on. That reduces the damage if an admin account is compromised.', 'aicite-guard' ),
+				'title'  => __( 'Theme/plugin file editor is disabled', 'spg-by-ppros' ),
+				'detail' => __( 'DISALLOW_FILE_EDIT is on. That reduces the damage if an admin account is compromised.', 'spg-by-ppros' ),
 			);
 		} else {
 			$items[] = array(
 				'status' => 'info',
-				'title'  => __( 'Consider disabling the file editor', 'aicite-guard' ),
-				'detail' => __( 'Add DISALLOW_FILE_EDIT to wp-config.php so attackers cannot edit PHP from wp-admin.', 'aicite-guard' ),
+				'title'  => __( 'Consider disabling the file editor', 'spg-by-ppros' ),
+				'detail' => __( 'Add DISALLOW_FILE_EDIT to wp-config.php so attackers cannot edit PHP from wp-admin.', 'spg-by-ppros' ),
 			);
 		}
 
 		if ( defined( 'WP_DEBUG' ) && WP_DEBUG && defined( 'WP_DEBUG_DISPLAY' ) && WP_DEBUG_DISPLAY ) {
 			$items[] = array(
 				'status' => 'warn',
-				'title'  => __( 'Debug display is on', 'aicite-guard' ),
-				'detail' => __( 'Turn off WP_DEBUG_DISPLAY on a live site so errors are not shown to visitors.', 'aicite-guard' ),
+				'title'  => __( 'Debug display is on', 'spg-by-ppros' ),
+				'detail' => __( 'Turn off WP_DEBUG_DISPLAY on a live site so errors are not shown to visitors.', 'spg-by-ppros' ),
 			);
 		}
 
@@ -373,13 +373,13 @@ class Aicite_Guard_Health {
 	 */
 	private function label( $score ) {
 		if ( $score >= 80 ) {
-			return __( 'Healthy', 'aicite-guard' );
+			return __( 'Healthy', 'spg-by-ppros' );
 		}
 		if ( $score >= 55 ) {
-			return __( 'Watch closely', 'aicite-guard' );
+			return __( 'Watch closely', 'spg-by-ppros' );
 		}
 
-		return __( 'Overloaded', 'aicite-guard' );
+		return __( 'Overloaded', 'spg-by-ppros' );
 	}
 
 	/**
@@ -393,26 +393,26 @@ class Aicite_Guard_Health {
 	 */
 	private function summary( $score, $unused, $conflicts, $outdated ) {
 		if ( $score >= 80 ) {
-			return __( 'The install looks lean. Re-scan after you add plugins or skip updates for a while.', 'aicite-guard' );
+			return __( 'The install looks lean. Re-scan after you add plugins or skip updates for a while.', 'spg-by-ppros' );
 		}
 
 		$parts = array();
 		if ( $unused ) {
 			$parts[] = sprintf(
 				/* translators: %d: unused plugin count */
-				_n( '%d inactive plugin can be removed', '%d inactive plugins can be removed', count( $unused ), 'aicite-guard' ),
+				_n( '%d inactive plugin can be removed', '%d inactive plugins can be removed', count( $unused ), 'spg-by-ppros' ),
 				count( $unused )
 			);
 		}
 		if ( $conflicts ) {
-			$parts[] = __( 'overlapping plugins were detected', 'aicite-guard' );
+			$parts[] = __( 'overlapping plugins were detected', 'spg-by-ppros' );
 		}
 		if ( $outdated ) {
-			$parts[] = __( 'updates are waiting', 'aicite-guard' );
+			$parts[] = __( 'updates are waiting', 'spg-by-ppros' );
 		}
 
 		if ( ! $parts ) {
-			return __( 'A few items are adding weight. Review the lists below.', 'aicite-guard' );
+			return __( 'A few items are adding weight. Review the lists below.', 'spg-by-ppros' );
 		}
 
 		return ucfirst( implode( ', ', $parts ) ) . '.';

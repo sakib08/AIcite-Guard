@@ -1,8 +1,8 @@
 (function () {
 	'use strict';
 
-	var config = window.aiciteGuardAdmin || {};
-	var notice = document.querySelector('[data-acg-notice]');
+	var config = window.spgByPprosAdmin || {};
+	var notice = document.querySelector('[data-spg-by-ppros-notice]');
 
 	function showNotice(message, isError) {
 		if (!notice) {
@@ -53,21 +53,21 @@
 	}
 
 	document.addEventListener('click', function (event) {
-		var button = event.target.closest('[data-acg-action]');
+		var button = event.target.closest('[data-spg-by-ppros-action]');
 		if (!button) {
 			return;
 		}
 
-		var action = button.getAttribute('data-acg-action');
+		var action = button.getAttribute('data-spg-by-ppros-action');
 
 		if (action === 'regenerate-llms') {
 			event.preventDefault();
 			withBusy(button, function () {
-				return post('aicite_guard_regenerate_llms').then(function (json) {
+				return post('spg_by_ppros_regenerate_llms').then(function (json) {
 					if (!json.success) {
 						throw new Error((json.data && json.data.message) || (config.i18n && config.i18n.error));
 					}
-					var preview = document.getElementById('acg-llms-preview');
+					var preview = document.getElementById('spg-by-ppros-llms-preview');
 					if (preview && json.data.basic) {
 						preview.textContent = json.data.basic;
 					}
@@ -82,9 +82,9 @@
 		if (action === 'scan-a11y' || action === 'refresh-health' || action === 'statement') {
 			event.preventDefault();
 			var map = {
-				'scan-a11y': 'aicite_guard_scan_a11y',
-				'refresh-health': 'aicite_guard_refresh_health',
-				statement: 'aicite_guard_statement'
+				'scan-a11y': 'spg_by_ppros_scan_a11y',
+				'refresh-health': 'spg_by_ppros_refresh_health',
+				statement: 'spg_by_ppros_statement'
 			};
 			withBusy(button, function () {
 				return post(map[action]).then(function (json) {
@@ -106,7 +106,7 @@
 				return;
 			}
 			var id = row.getAttribute('data-attachment');
-			var field = row.querySelector('.acg-alt-field');
+			var field = row.querySelector('.spg-by-ppros-alt-field');
 			var extra = { attachment_id: id };
 
 			if (action === 'apply-alt') {
@@ -117,7 +117,7 @@
 			}
 
 			withBusy(button, function () {
-				return post(action === 'generate-alt' ? 'aicite_guard_generate_alt' : 'aicite_guard_apply_alt', extra).then(function (json) {
+				return post(action === 'generate-alt' ? 'spg_by_ppros_generate_alt' : 'spg_by_ppros_apply_alt', extra).then(function (json) {
 					if (!json.success) {
 						throw new Error((json.data && json.data.message) || (config.i18n && config.i18n.error));
 					}
@@ -135,13 +135,13 @@
 		}
 	});
 
-	var wizard = document.querySelector('[data-acg-wizard]');
+	var wizard = document.querySelector('[data-spg-by-ppros-wizard]');
 	if (!wizard) {
 		return;
 	}
 
-	var steps = wizard.querySelectorAll('.acg-step');
-	var pills = wizard.querySelectorAll('.acg-steps li');
+	var steps = wizard.querySelectorAll('.spg-by-ppros-step');
+	var pills = wizard.querySelectorAll('.spg-by-ppros-steps li');
 	var current = 1;
 
 	function showStep(index) {
@@ -157,13 +157,13 @@
 	}
 
 	wizard.addEventListener('click', function (event) {
-		if (event.target.closest('[data-acg-next]')) {
+		if (event.target.closest('[data-spg-by-ppros-next]')) {
 			showStep(Math.min(4, current + 1));
 		}
-		if (event.target.closest('[data-acg-prev]')) {
+		if (event.target.closest('[data-spg-by-ppros-prev]')) {
 			showStep(Math.max(1, current - 1));
 		}
-		if (!event.target.closest('[data-acg-finish]')) {
+		if (!event.target.closest('[data-spg-by-ppros-finish]')) {
 			return;
 		}
 
@@ -195,9 +195,9 @@
 			wizard_complete: true
 		};
 
-		var finish = event.target.closest('[data-acg-finish]');
+		var finish = event.target.closest('[data-spg-by-ppros-finish]');
 		withBusy(finish, function () {
-			return post('aicite_guard_save_wizard', { settings: JSON.stringify(payload) }).then(function (json) {
+			return post('spg_by_ppros_save_wizard', { settings: JSON.stringify(payload) }).then(function (json) {
 				if (!json.success) {
 					throw new Error((json.data && json.data.message) || (config.i18n && config.i18n.error));
 				}

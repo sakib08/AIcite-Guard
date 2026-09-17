@@ -2,7 +2,7 @@
 /**
  * Accessibility scanning, scoring, and statement helper.
  *
- * @package Aicite_Guard
+ * @package Sitepulse_Guard_By_Plugin_Pros
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Backend accessibility checks with user-approved fixes.
  */
-class Aicite_Guard_Accessibility {
+class Sitepulse_Guard_By_Plugin_Pros_Accessibility {
 
 	/**
 	 * Scan published content and media.
@@ -21,7 +21,7 @@ class Aicite_Guard_Accessibility {
 	 * @return array<string, mixed>
 	 */
 	public function scan( $limit = 40 ) {
-		$types = Aicite_Guard_Settings::get_path( 'ai_visibility.post_types', array( 'post', 'page' ) );
+		$types = Sitepulse_Guard_By_Plugin_Pros_Settings::get_path( 'ai_visibility.post_types', array( 'post', 'page' ) );
 		$query = new WP_Query(
 			array(
 				'post_type'              => $types,
@@ -63,8 +63,8 @@ class Aicite_Guard_Accessibility {
 					$suggestions[] = $item;
 				}
 
-				update_post_meta( $post->ID, '_aicite_guard_a11y_score', $report['score'] );
-				update_post_meta( $post->ID, '_aicite_guard_a11y_issues', $report['issues'] );
+				update_post_meta( $post->ID, '_spg_by_ppros_a11y_score', $report['score'] );
+				update_post_meta( $post->ID, '_spg_by_ppros_a11y_issues', $report['issues'] );
 			}
 		}
 
@@ -89,10 +89,10 @@ class Aicite_Guard_Accessibility {
 			'recommendations' => $this->recommendations( $totals ),
 		);
 
-		update_option( 'aicite_guard_a11y_report', $report, false );
-		update_option( 'aicite_guard_alt_suggestions', $this->unique_suggestions( $suggestions ), false );
+		update_option( 'spg_by_ppros_a11y_report', $report, false );
+		update_option( 'spg_by_ppros_alt_suggestions', $this->unique_suggestions( $suggestions ), false );
 
-		$scores        = get_option( 'aicite_guard_scores', array() );
+		$scores        = get_option( 'spg_by_ppros_scores', array() );
 		$scores        = is_array( $scores ) ? $scores : array();
 		$scores['a11y'] = array(
 			'score'      => $score,
@@ -100,7 +100,7 @@ class Aicite_Guard_Accessibility {
 			'summary'    => $report['summary'],
 			'calculated' => time(),
 		);
-		update_option( 'aicite_guard_scores', $scores, false );
+		update_option( 'spg_by_ppros_scores', $scores, false );
 
 		return $report;
 	}
@@ -128,7 +128,7 @@ class Aicite_Guard_Accessibility {
 			// Builder content often lives outside post_content; do not fail the page hard.
 			$issues[] = array(
 				'type'    => 'content',
-				'message' => __( 'This page has little stored HTML. If you use a builder, scan the live page after publishing.', 'aicite-guard' ),
+				'message' => __( 'This page has little stored HTML. If you use a builder, scan the live page after publishing.', 'spg-by-ppros' ),
 			);
 		}
 
@@ -251,11 +251,11 @@ class Aicite_Guard_Accessibility {
 		$alt           = sanitize_text_field( $alt );
 
 		if ( ! $attachment_id || 'attachment' !== get_post_type( $attachment_id ) ) {
-			return new WP_Error( 'aicite_guard_alt', __( 'Invalid image.', 'aicite-guard' ) );
+			return new WP_Error( 'spg_by_ppros_alt', __( 'Invalid image.', 'spg-by-ppros' ) );
 		}
 
 		if ( '' === $alt ) {
-			return new WP_Error( 'aicite_guard_alt', __( 'Alt text cannot be empty.', 'aicite-guard' ) );
+			return new WP_Error( 'spg_by_ppros_alt', __( 'Alt text cannot be empty.', 'spg-by-ppros' ) );
 		}
 
 		update_post_meta( $attachment_id, '_wp_attachment_image_alt', $alt );
@@ -273,12 +273,12 @@ class Aicite_Guard_Accessibility {
 	public function generate_alt( $attachment_id ) {
 		$attachment = get_post( absint( $attachment_id ) );
 		if ( ! $attachment || 'attachment' !== $attachment->post_type ) {
-			return new WP_Error( 'aicite_guard_alt', __( 'Invalid image.', 'aicite-guard' ) );
+			return new WP_Error( 'spg_by_ppros_alt', __( 'Invalid image.', 'spg-by-ppros' ) );
 		}
 
 		$fallback = $this->suggest_alt_rule_based( $attachment );
 
-		if ( ! Aicite_Guard_Settings::has_ai_key() ) {
+		if ( ! Sitepulse_Guard_By_Plugin_Pros_Ai::is_available() ) {
 			return $fallback;
 		}
 
@@ -288,11 +288,11 @@ class Aicite_Guard_Accessibility {
 		}
 
 		$context = $this->attachment_context( $attachment );
-		$prompt  = __( 'Write concise, factual HTML alt text (max 15 words). Do not start with “image of”. Describe what a screen reader user needs. Return only the alt text.', 'aicite-guard' );
+		$prompt  = __( 'Write concise, factual HTML alt text (max 15 words). Do not start with “image of”. Describe what a screen reader user needs. Return only the alt text.', 'spg-by-ppros' );
 
-		$result = Aicite_Guard_Ai::complete( $prompt, $context, $url );
+		$result = Sitepulse_Guard_By_Plugin_Pros_Ai::complete( $prompt, $context, $url );
 		if ( is_wp_error( $result ) ) {
-			if ( in_array( $result->get_error_code(), array( 'aicite_guard_limit', 'aicite_guard_no_key' ), true ) ) {
+			if ( in_array( $result->get_error_code(), array( 'spg_by_ppros_limit', 'spg_by_ppros_unavailable' ), true ) ) {
 				return $result;
 			}
 			return $fallback;
@@ -308,9 +308,9 @@ class Aicite_Guard_Accessibility {
 	 * @return int|WP_Error Page ID.
 	 */
 	public function generate_statement_page() {
-		$existing = (int) Aicite_Guard_Settings::get_path( 'accessibility.statement_page', 0 );
+		$existing = (int) Sitepulse_Guard_By_Plugin_Pros_Settings::get_path( 'accessibility.statement_page', 0 );
 		$content  = $this->statement_content();
-		$title    = __( 'Accessibility Statement', 'aicite-guard' );
+		$title    = __( 'Accessibility Statement', 'spg-by-ppros' );
 
 		if ( $existing && get_post( $existing ) ) {
 			$update = wp_update_post(
@@ -340,7 +340,7 @@ class Aicite_Guard_Accessibility {
 			return $page_id;
 		}
 
-		Aicite_Guard_Settings::update(
+		Sitepulse_Guard_By_Plugin_Pros_Settings::update(
 			array(
 				'accessibility' => array(
 					'statement_page' => (int) $page_id,
@@ -357,7 +357,7 @@ class Aicite_Guard_Accessibility {
 	 * @return array<string, mixed>
 	 */
 	public function last_report() {
-		$report = get_option( 'aicite_guard_a11y_report', array() );
+		$report = get_option( 'spg_by_ppros_a11y_report', array() );
 		return is_array( $report ) ? $report : array();
 	}
 
@@ -367,7 +367,7 @@ class Aicite_Guard_Accessibility {
 	 * @return array<int, array<string, mixed>>
 	 */
 	public function suggestions() {
-		$items = get_option( 'aicite_guard_alt_suggestions', array() );
+		$items = get_option( 'spg_by_ppros_alt_suggestions', array() );
 		return is_array( $items ) ? $items : array();
 	}
 
@@ -399,13 +399,13 @@ class Aicite_Guard_Accessibility {
 				++$missing;
 				$issues[] = array(
 					'type'    => 'missing_alt',
-					'message' => __( 'An image is missing alt text.', 'aicite-guard' ),
+					'message' => __( 'An image is missing alt text.', 'spg-by-ppros' ),
 				);
 			} else {
 				++$weak;
 				$issues[] = array(
 					'type'    => 'weak_alt',
-					'message' => __( 'An image uses weak or filename-like alt text.', 'aicite-guard' ),
+					'message' => __( 'An image uses weak or filename-like alt text.', 'spg-by-ppros' ),
 				);
 			}
 
@@ -468,7 +468,7 @@ class Aicite_Guard_Accessibility {
 		if ( $h1 > 1 ) {
 			$issues[] = array(
 				'type'    => 'heading',
-				'message' => __( 'More than one H1 found. Keep a single page title.', 'aicite-guard' ),
+				'message' => __( 'More than one H1 found. Keep a single page title.', 'spg-by-ppros' ),
 			);
 		}
 
@@ -477,7 +477,7 @@ class Aicite_Guard_Accessibility {
 			if ( $level > $prev + 1 ) {
 				$issues[] = array(
 					'type'    => 'heading',
-					'message' => __( 'Heading levels skip a step (for example H2 to H4). Use a logical outline.', 'aicite-guard' ),
+					'message' => __( 'Heading levels skip a step (for example H2 to H4). Use a logical outline.', 'spg-by-ppros' ),
 				);
 				break;
 			}
@@ -525,7 +525,7 @@ class Aicite_Guard_Accessibility {
 					++$issues;
 					$list[] = array(
 						'type'    => 'label',
-						'message' => __( 'A form field is missing an associated label.', 'aicite-guard' ),
+						'message' => __( 'A form field is missing an associated label.', 'spg-by-ppros' ),
 					);
 				}
 			}
@@ -555,7 +555,7 @@ class Aicite_Guard_Accessibility {
 				++$count;
 				$issues[] = array(
 					'type'    => 'link',
-					'message' => __( 'A link uses vague text such as “click here”. Use descriptive link text.', 'aicite-guard' ),
+					'message' => __( 'A link uses vague text such as “click here”. Use descriptive link text.', 'spg-by-ppros' ),
 				);
 			}
 		}
@@ -582,7 +582,7 @@ class Aicite_Guard_Accessibility {
 				++$count;
 				$issues[] = array(
 					'type'    => 'iframe',
-					'message' => __( 'An embedded frame is missing a title.', 'aicite-guard' ),
+					'message' => __( 'An embedded frame is missing a title.', 'spg-by-ppros' ),
 				);
 			}
 		}
@@ -670,7 +670,7 @@ class Aicite_Guard_Accessibility {
 			if ( $parent_title ) {
 				return sprintf(
 					/* translators: %s: parent page title */
-					__( 'Illustration for %s', 'aicite-guard' ),
+					__( 'Illustration for %s', 'spg-by-ppros' ),
 					$parent_title
 				);
 			}
@@ -681,7 +681,7 @@ class Aicite_Guard_Accessibility {
 			return wp_trim_words( $caption, 12, '' );
 		}
 
-		return __( 'Descriptive image', 'aicite-guard' );
+		return __( 'Descriptive image', 'spg-by-ppros' );
 	}
 
 	/**
@@ -760,13 +760,13 @@ class Aicite_Guard_Accessibility {
 	 */
 	private function label( $score ) {
 		if ( $score >= 85 ) {
-			return __( 'Strong', 'aicite-guard' );
+			return __( 'Strong', 'spg-by-ppros' );
 		}
 		if ( $score >= 60 ) {
-			return __( 'Fair', 'aicite-guard' );
+			return __( 'Fair', 'spg-by-ppros' );
 		}
 
-		return __( 'Needs work', 'aicite-guard' );
+		return __( 'Needs work', 'spg-by-ppros' );
 	}
 
 	/**
@@ -778,12 +778,12 @@ class Aicite_Guard_Accessibility {
 	 */
 	private function summary( $score, $totals ) {
 		if ( $score >= 85 ) {
-			return __( 'Most scanned pages look solid. Review any remaining image or form warnings before you publish an EAA statement.', 'aicite-guard' );
+			return __( 'Most scanned pages look solid. Review any remaining image or form warnings before you publish an EAA statement.', 'spg-by-ppros' );
 		}
 
 		return sprintf(
 			/* translators: 1: missing alt count, 2: unlabeled fields */
-			__( 'Found %1$d images needing better alt text and %2$d form-label issues. Approve fixes before anything is changed.', 'aicite-guard' ),
+			__( 'Found %1$d images needing better alt text and %2$d form-label issues. Approve fixes before anything is changed.', 'spg-by-ppros' ),
 			(int) $totals['missing_alt'] + (int) $totals['weak_alt'],
 			(int) $totals['label']
 		);
@@ -799,19 +799,19 @@ class Aicite_Guard_Accessibility {
 		$recs = array();
 
 		if ( $totals['missing_alt'] || $totals['weak_alt'] ) {
-			$recs[] = __( 'Approve suggested alt text for images. Screen readers and EAA audits look for this first.', 'aicite-guard' );
+			$recs[] = __( 'Approve suggested alt text for images. Screen readers and EAA audits look for this first.', 'spg-by-ppros' );
 		}
 		if ( $totals['label'] ) {
-			$recs[] = __( 'Add a visible label (or aria-label) to every form field. The visitor widget cannot fix this.', 'aicite-guard' );
+			$recs[] = __( 'Add a visible label (or aria-label) to every form field. The visitor widget cannot fix this.', 'spg-by-ppros' );
 		}
 		if ( $totals['heading'] ) {
-			$recs[] = __( 'Use one H1 and do not skip heading levels. This helps keyboard and AT users scan the page.', 'aicite-guard' );
+			$recs[] = __( 'Use one H1 and do not skip heading levels. This helps keyboard and AT users scan the page.', 'spg-by-ppros' );
 		}
 		if ( $totals['iframe'] ) {
-			$recs[] = __( 'Give embeds (maps, videos) a short title that describes the content.', 'aicite-guard' );
+			$recs[] = __( 'Give embeds (maps, videos) a short title that describes the content.', 'spg-by-ppros' );
 		}
 		if ( ! $recs ) {
-			$recs[] = __( 'Publish an accessibility statement and keep the visitor widget available as a complement — not a substitute — for real fixes.', 'aicite-guard' );
+			$recs[] = __( 'Publish an accessibility statement and keep the visitor widget available as a complement — not a substitute — for real fixes.', 'spg-by-ppros' );
 		}
 
 		return $recs;
@@ -851,7 +851,7 @@ class Aicite_Guard_Accessibility {
 				}
 			)
 		);
-		update_option( 'aicite_guard_alt_suggestions', $items, false );
+		update_option( 'spg_by_ppros_alt_suggestions', $items, false );
 	}
 
 	/**
@@ -877,28 +877,28 @@ class Aicite_Guard_Accessibility {
 			'<p>' . esc_html(
 				sprintf(
 					/* translators: %s: site name */
-					__( '%s is committed to making this website accessible to as many people as possible, including people with disabilities. We aim to meet WCAG 2.2 Level AA and to support the European Accessibility Act where it applies.', 'aicite-guard' ),
+					__( '%s is committed to making this website accessible to as many people as possible, including people with disabilities. We aim to meet WCAG 2.2 Level AA and to support the European Accessibility Act where it applies.', 'spg-by-ppros' ),
 					$site
 				)
 			) . '</p>',
-			'<h2>' . esc_html__( 'Measures we take', 'aicite-guard' ) . '</h2>',
+			'<h2>' . esc_html__( 'Measures we take', 'spg-by-ppros' ) . '</h2>',
 			'<ul>',
-			'<li>' . esc_html__( 'Provide text alternatives for meaningful images.', 'aicite-guard' ) . '</li>',
-			'<li>' . esc_html__( 'Keep a logical heading structure and keyboard-accessible navigation.', 'aicite-guard' ) . '</li>',
-			'<li>' . esc_html__( 'Associate labels with form controls.', 'aicite-guard' ) . '</li>',
-			'<li>' . esc_html__( 'Offer a visitor accessibility widget for font size and contrast preferences.', 'aicite-guard' ) . '</li>',
+			'<li>' . esc_html__( 'Provide text alternatives for meaningful images.', 'spg-by-ppros' ) . '</li>',
+			'<li>' . esc_html__( 'Keep a logical heading structure and keyboard-accessible navigation.', 'spg-by-ppros' ) . '</li>',
+			'<li>' . esc_html__( 'Associate labels with form controls.', 'spg-by-ppros' ) . '</li>',
+			'<li>' . esc_html__( 'Offer a visitor accessibility widget for font size and contrast preferences.', 'spg-by-ppros' ) . '</li>',
 			'</ul>',
-			'<h2>' . esc_html__( 'Known limitations', 'aicite-guard' ) . '</h2>',
-			'<p>' . esc_html__( 'Some older content, third-party embeds, or page-builder blocks may not yet meet every success criterion. We review issues reported to us and prioritize real content fixes over overlay-only workarounds.', 'aicite-guard' ) . '</p>',
-			'<h2>' . esc_html__( 'Feedback', 'aicite-guard' ) . '</h2>',
+			'<h2>' . esc_html__( 'Known limitations', 'spg-by-ppros' ) . '</h2>',
+			'<p>' . esc_html__( 'Some older content, third-party embeds, or page-builder blocks may not yet meet every success criterion. We review issues reported to us and prioritize real content fixes over overlay-only workarounds.', 'spg-by-ppros' ) . '</p>',
+			'<h2>' . esc_html__( 'Feedback', 'spg-by-ppros' ) . '</h2>',
 			'<p>' . esc_html(
 				sprintf(
 					/* translators: %s: admin email */
-					__( 'If you find a barrier, please email %s and include the page URL and a short description of the problem. We aim to reply within five working days.', 'aicite-guard' ),
+					__( 'If you find a barrier, please email %s and include the page URL and a short description of the problem. We aim to reply within five working days.', 'spg-by-ppros' ),
 					$email
 				)
 			) . '</p>',
-			'<p><em>' . esc_html__( 'This statement was generated with AIcite Guard and should be reviewed by the site owner before it is treated as a legal document.', 'aicite-guard' ) . '</em></p>',
+			'<p><em>' . esc_html__( 'This statement was generated with SitePulse Guard and should be reviewed by the site owner before it is treated as a legal document.', 'spg-by-ppros' ) . '</em></p>',
 		);
 
 		return implode( "\n", $paragraphs );

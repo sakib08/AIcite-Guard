@@ -1,9 +1,9 @@
-.aicite-guard {
+.spg-by-ppros {
 	max-width: 1100px;
 	margin-top: 16px;
 }
 
-.aicite-guard .acg-top {
+.spg-by-ppros .spg-by-ppros-top {
 	background: #fff;
 	border: 1px solid #dcdcde;
 	border-radius: 10px;
@@ -11,13 +11,13 @@
 	margin-bottom: 18px;
 }
 
-.aicite-guard .acg-brand {
+.spg-by-ppros .spg-by-ppros-brand {
 	display: flex;
 	gap: 14px;
 	align-items: flex-start;
 }
 
-.aicite-guard .acg-logo {
+.spg-by-ppros .spg-by-ppros-logo {
 	width: 42px;
 	height: 42px;
 	border-radius: 10px;
@@ -30,18 +30,18 @@
 	font-size: 20px;
 }
 
-.aicite-guard .acg-brand h1 {
+.spg-by-ppros .spg-by-ppros-brand h1 {
 	margin: 0 0 4px;
 	padding: 0;
 	font-size: 22px;
 }
 
-.aicite-guard .acg-brand p {
+.spg-by-ppros .spg-by-ppros-brand p {
 	margin: 0 0 12px;
 	color: #50575e;
 }
 
-.aicite-guard .acg-nav {
+.spg-by-ppros .spg-by-ppros-nav {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 6px;
@@ -49,7 +49,7 @@
 	padding: 10px 0;
 }
 
-.aicite-guard .acg-nav a {
+.spg-by-ppros .spg-by-ppros-nav a {
 	text-decoration: none;
 	color: #1d2327;
 	padding: 6px 10px;
@@ -57,13 +57,13 @@
 	font-weight: 600;
 }
 
-.acg-nav a.is-active,
-.aicite-guard .acg-nav a:hover {
+.spg-by-ppros-nav a.is-active,
+.spg-by-ppros .spg-by-ppros-nav a:hover {
 	background: #f0fdfa;
 	color: #0f766e;
 }
 
-.aicite-guard .acg-notice {
+.spg-by-ppros .spg-by-ppros-notice {
 	margin: 0 0 16px;
 	padding: 10px 14px;
 	border-left: 4px solid #0f766e;
@@ -71,21 +71,21 @@
 	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
 }
 
-.aicite-guard .acg-grid {
+.spg-by-ppros .spg-by-ppros-grid {
 	display: grid;
 	gap: 16px;
 	margin-bottom: 16px;
 }
 
-.aicite-guard .acg-grid--2 {
+.spg-by-ppros .spg-by-ppros-grid--2 {
 	grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.aicite-guard .acg-grid--3 {
+.spg-by-ppros .spg-by-ppros-grid--3 {
 	grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
-.aicite-guard .acg-card {
+.spg-by-ppros .spg-by-ppros-card {
 	background: #fff;
 	border: 1px solid #dcdcde;
 	border-radius: 10px;
@@ -93,17 +93,17 @@
 	box-sizing: border-box;
 }
 
-.aicite-guard .acg-card h2 {
+.spg-by-ppros .spg-by-ppros-card h2 {
 	margin-top: 0;
 }
 
-.aicite-guard .acg-score-card {
+.spg-by-ppros .spg-by-ppros-score-card {
 	display: flex;
 	gap: 16px;
 	align-items: flex-start;
 }
 
-.aicite-guard .acg-score {
+.spg-by-ppros .spg-by-ppros-score {
 	width: 84px;
 	height: 84px;
 	border-radius: 50%;
@@ -115,29 +115,29 @@
 	flex: 0 0 84px;
 }
 
-.aicite-guard .acg-score strong {
+.spg-by-ppros .spg-by-ppros-score strong {
 	font-size: 22px;
 	line-height: 1;
 }
 
-.aicite-guard .acg-score span {
+.spg-by-ppros .spg-by-ppros-score span {
 	color: #646970;
 	font-size: 11px;
 }
 
-.aicite-guard .acg-score.is-good {
+.spg-by-ppros .spg-by-ppros-score.is-good {
 	border-color: #0f766e;
 }
 
-.aicite-guard .acg-score.is-ok {
+.spg-by-ppros .spg-by-ppros-score.is-ok {
 	border-color: #d97706;
 }
 
-.aicite-guard .acg-score.is-bad {
+.spg-by-ppros .spg-by-ppros-score.is-bad {
 	border-color: #b32d2e;
 }
 
-.aicite-guard .acg-pill {
+.spg-by-ppros .spg-by-ppros-pill {
 	display: inline-block;
 	background: #f0fdfa;
 	color: #0f766e;
@@ -148,27 +148,27 @@
 	margin: 0 0 8px;
 }
 
-.acg-actions,
-.acg-list,
-.acg-checks,
-.aicite-guard .acg-badges {
+.spg-by-ppros-actions,
+.spg-by-ppros-list,
+.spg-by-ppros-checks,
+.spg-by-ppros .spg-by-ppros-badges {
 	margin: 0;
 	padding: 0;
 	list-style: none;
 }
 
-.acg-actions li,
-.aicite-guard .acg-list li {
+.spg-by-ppros-actions li,
+.spg-by-ppros .spg-by-ppros-list li {
 	margin: 0 0 10px;
 }
 
-.aicite-guard .acg-checks li {
+.spg-by-ppros .spg-by-ppros-checks li {
 	margin: 0 0 12px;
 	padding-left: 18px;
 	position: relative;
 }
 
-.aicite-guard .acg-checks li::before {
+.spg-by-ppros .spg-by-ppros-checks li::before {
 	content: "";
 	width: 8px;
 	height: 8px;
@@ -179,42 +179,42 @@
 	top: 7px;
 }
 
-.acg-checks .is-pass::before,
-.aicite-guard .acg-checks .is-ok::before {
+.spg-by-ppros-checks .is-pass::before,
+.spg-by-ppros .spg-by-ppros-checks .is-ok::before {
 	background: #0f766e;
 }
 
-.acg-checks .is-fail::before,
-.aicite-guard .acg-checks .is-warn::before {
+.spg-by-ppros-checks .is-fail::before,
+.spg-by-ppros .spg-by-ppros-checks .is-warn::before {
 	background: #d97706;
 }
 
-.acg-checks li strong,
-.aicite-guard .acg-checks li span {
+.spg-by-ppros-checks li strong,
+.spg-by-ppros .spg-by-ppros-checks li span {
 	display: block;
 }
 
-.aicite-guard .acg-badges {
+.spg-by-ppros .spg-by-ppros-badges {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 8px;
 	margin: 12px 0;
 }
 
-.aicite-guard .acg-badges li {
+.spg-by-ppros .spg-by-ppros-badges li {
 	border: 1px solid #dcdcde;
 	border-radius: 999px;
 	padding: 4px 10px;
 	font-size: 12px;
 }
 
-.aicite-guard .acg-badges .is-on {
+.spg-by-ppros .spg-by-ppros-badges .is-on {
 	background: #f0fdfa;
 	border-color: #99f6e4;
 	color: #0f766e;
 }
 
-.aicite-guard .acg-preview {
+.spg-by-ppros .spg-by-ppros-preview {
 	background: #0f172a;
 	color: #e2e8f0;
 	padding: 16px;
@@ -226,27 +226,27 @@
 	line-height: 1.5;
 }
 
-.aicite-guard .acg-table img {
+.spg-by-ppros .spg-by-ppros-table img {
 	vertical-align: middle;
 	margin-right: 8px;
 	border-radius: 4px;
 }
 
-.acg-switch,
-.aicite-guard .acg-settings fieldset label {
+.spg-by-ppros-switch,
+.spg-by-ppros .spg-by-ppros-settings fieldset label {
 	display: flex;
 	align-items: center;
 	gap: 8px;
 	margin: 0 0 10px;
 }
 
-.aicite-guard .acg-settings fieldset {
+.spg-by-ppros .spg-by-ppros-settings fieldset {
 	border: 0;
 	padding: 0;
 	margin: 12px 0;
 }
 
-.aicite-guard .acg-callout {
+.spg-by-ppros .spg-by-ppros-callout {
 	background: #fffbeb;
 	border: 1px solid #fde68a;
 	border-radius: 8px;
@@ -254,7 +254,7 @@
 	margin-bottom: 10px;
 }
 
-.aicite-guard .acg-steps {
+.spg-by-ppros .spg-by-ppros-steps {
 	display: flex;
 	gap: 12px;
 	list-style: none;
@@ -263,23 +263,23 @@
 	color: #646970;
 }
 
-.aicite-guard .acg-steps .is-active {
+.spg-by-ppros .spg-by-ppros-steps .is-active {
 	color: #0f766e;
 	font-weight: 700;
 }
 
-.aicite-guard .acg-footnote {
+.spg-by-ppros .spg-by-ppros-footnote {
 	color: #646970;
 	margin-top: 8px;
 }
 
 @media (max-width: 960px) {
-	.acg-grid--2,
-	.aicite-guard .acg-grid--3 {
+	.spg-by-ppros-grid--2,
+	.spg-by-ppros .spg-by-ppros-grid--3 {
 		grid-template-columns: 1fr;
 	}
 
-	.aicite-guard .acg-score-card {
+	.spg-by-ppros .spg-by-ppros-score-card {
 		flex-direction: column;
 	}
 }

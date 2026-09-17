@@ -2,7 +2,7 @@
 /**
  * Register all actions and filters for the plugin.
  *
- * @package Aicite_Guard
+ * @package Sitepulse_Guard_By_Plugin_Pros
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Maintains and registers hooks with WordPress.
  */
-class Aicite_Guard_Loader {
+class Sitepulse_Guard_By_Plugin_Pros_Loader {
 
 	/**
 	 * The actions registered with WordPress.

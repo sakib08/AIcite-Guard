@@ -2,7 +2,7 @@
 /**
  * AI-oriented structured data (JSON-LD) + admin suggestions.
  *
- * @package Aicite_Guard
+ * @package Sitepulse_Guard_By_Plugin_Pros
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Outputs WebSite, Organization, Article/WebPage, and FAQ JSON-LD
  * only when Yoast / Rank Math (and similar) are not already in charge.
  */
-class Aicite_Guard_Schema {
+class Sitepulse_Guard_By_Plugin_Pros_Schema {
 
 	/**
 	 * Print JSON-LD in wp_head when this plugin should own schema.
@@ -25,7 +25,7 @@ class Aicite_Guard_Schema {
 			return;
 		}
 
-		if ( ! Aicite_Guard_Settings::get_path( 'schema.enabled', true ) ) {
+		if ( ! Sitepulse_Guard_By_Plugin_Pros_Settings::get_path( 'schema.enabled', true ) ) {
 			return;
 		}
 
@@ -48,7 +48,7 @@ class Aicite_Guard_Schema {
 			return;
 		}
 
-		echo '<script type="application/ld+json" id="aicite-guard-schema">' . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo '<script type="application/ld+json" id="spg-by-ppros-schema">' . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		echo $json . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON-LD from wp_json_encode.
 		echo '</script>' . "\n";
 	}
@@ -60,34 +60,34 @@ class Aicite_Guard_Schema {
 	 */
 	public function suggestions() {
 		$has_seo     = $this->seo_plugin_handles_schema();
-		$enabled     = (bool) Aicite_Guard_Settings::get_path( 'schema.enabled', true );
+		$enabled     = (bool) Sitepulse_Guard_By_Plugin_Pros_Settings::get_path( 'schema.enabled', true );
 		$suggestions = array();
 
 		if ( $has_seo ) {
 			$suggestions[] = array(
 				'status' => 'ok',
-				'title'  => __( 'SEO plugin owns structured data', 'aicite-guard' ),
-				'detail' => __( 'Yoast, Rank Math, or another SEO plugin is active. AIcite Guard will not print competing JSON-LD.', 'aicite-guard' ),
+				'title'  => __( 'SEO plugin owns structured data', 'spg-by-ppros' ),
+				'detail' => __( 'Yoast, Rank Math, or another SEO plugin is active. SitePulse Guard will not print competing JSON-LD.', 'spg-by-ppros' ),
 			);
 		} elseif ( $enabled ) {
 			$suggestions[] = array(
 				'status' => 'ok',
-				'title'  => __( 'AIcite Guard is outputting JSON-LD', 'aicite-guard' ),
-				'detail' => __( 'WebSite, Organization, Article/WebPage, and FAQ markup are printed when relevant. Pair with Yoast or Rank Math later if you want deeper SEO schema.', 'aicite-guard' ),
+				'title'  => __( 'SitePulse Guard is outputting JSON-LD', 'spg-by-ppros' ),
+				'detail' => __( 'WebSite, Organization, Article/WebPage, and FAQ markup are printed when relevant. Pair with Yoast or Rank Math later if you want deeper SEO schema.', 'spg-by-ppros' ),
 			);
 		} else {
 			$suggestions[] = array(
 				'status' => 'warn',
-				'title'  => __( 'Structured data output is turned off', 'aicite-guard' ),
-				'detail' => __( 'Enable schema in Settings, or install Yoast / Rank Math, so answer engines can identify your pages.', 'aicite-guard' ),
+				'title'  => __( 'Structured data output is turned off', 'spg-by-ppros' ),
+				'detail' => __( 'Enable schema in Settings, or install Yoast / Rank Math, so answer engines can identify your pages.', 'spg-by-ppros' ),
 			);
 		}
 
 		if ( ! get_bloginfo( 'description' ) ) {
 			$suggestions[] = array(
 				'status' => 'warn',
-				'title'  => __( 'Set a clear site tagline', 'aicite-guard' ),
-				'detail' => __( 'A one-sentence description in Settings → General improves WebSite schema and llms.txt.', 'aicite-guard' ),
+				'title'  => __( 'Set a clear site tagline', 'spg-by-ppros' ),
+				'detail' => __( 'A one-sentence description in Settings → General improves WebSite schema and llms.txt.', 'spg-by-ppros' ),
 			);
 		}
 
@@ -96,13 +96,13 @@ class Aicite_Guard_Schema {
 		if ( $published_posts > 0 ) {
 			$suggestions[] = array(
 				'status' => ( $has_seo || $enabled ) ? 'ok' : 'info',
-				'title'  => __( 'Article schema on posts', 'aicite-guard' ),
+				'title'  => __( 'Article schema on posts', 'spg-by-ppros' ),
 				'detail' => $has_seo
-					? __( 'Your SEO plugin marks posts as Article. Keep author names and dates visible.', 'aicite-guard' )
+					? __( 'Your SEO plugin marks posts as Article. Keep author names and dates visible.', 'spg-by-ppros' )
 					: (
 						$enabled
-							? __( 'AIcite Guard outputs Article JSON-LD on single posts (headline, dates, author, image).', 'aicite-guard' )
-							: __( 'Enable AIcite Guard schema or an SEO plugin so posts are marked as Article.', 'aicite-guard' )
+							? __( 'SitePulse Guard outputs Article JSON-LD on single posts (headline, dates, author, image).', 'spg-by-ppros' )
+							: __( 'Enable SitePulse Guard schema or an SEO plugin so posts are marked as Article.', 'spg-by-ppros' )
 					),
 			);
 		}
@@ -112,24 +112,24 @@ class Aicite_Guard_Schema {
 			if ( $post && count( $this->extract_faq_pairs( $post->post_content ) ) >= 2 ) {
 				$suggestions[] = array(
 					'status' => 'ok',
-					'title'  => __( 'FAQ-style content detected on this page', 'aicite-guard' ),
+					'title'  => __( 'FAQ-style content detected on this page', 'spg-by-ppros' ),
 					'detail' => $has_seo
-						? __( 'Consider enabling FAQ schema in your SEO plugin for this page.', 'aicite-guard' )
-						: __( 'AIcite Guard will include FAQPage JSON-LD when two or more Q&A pairs are found.', 'aicite-guard' ),
+						? __( 'Consider enabling FAQ schema in your SEO plugin for this page.', 'spg-by-ppros' )
+						: __( 'SitePulse Guard will include FAQPage JSON-LD when two or more Q&A pairs are found.', 'spg-by-ppros' ),
 				);
 			}
 		} elseif ( $this->site_has_faq_content() ) {
 			$suggestions[] = array(
 				'status' => 'info',
-				'title'  => __( 'FAQ-style content found on the site', 'aicite-guard' ),
-				'detail' => __( 'Pages with clear question headings can get FAQPage markup for better AI citations.', 'aicite-guard' ),
+				'title'  => __( 'FAQ-style content found on the site', 'spg-by-ppros' ),
+				'detail' => __( 'Pages with clear question headings can get FAQPage markup for better AI citations.', 'spg-by-ppros' ),
 			);
 		}
 
 		$suggestions[] = array(
 			'status' => 'info',
-			'title'  => __( 'Cite-friendly pages', 'aicite-guard' ),
-			'detail' => __( 'Use a unique H1, a short intro, visible authorship, and an updated date. Structured data works best with clear on-page content.', 'aicite-guard' ),
+			'title'  => __( 'Cite-friendly pages', 'spg-by-ppros' ),
+			'detail' => __( 'Use a unique H1, a short intro, visible authorship, and an updated date. Structured data works best with clear on-page content.', 'spg-by-ppros' ),
 		);
 
 		return $suggestions;
@@ -144,9 +144,9 @@ class Aicite_Guard_Schema {
 		$seo = $this->seo_plugin_handles_schema();
 
 		return array(
-			'enabled'       => (bool) Aicite_Guard_Settings::get_path( 'schema.enabled', true ),
+			'enabled'       => (bool) Sitepulse_Guard_By_Plugin_Pros_Settings::get_path( 'schema.enabled', true ),
 			'seo_active'    => $seo,
-			'outputting'    => ! $seo && Aicite_Guard_Settings::get_path( 'schema.enabled', true ),
+			'outputting'    => ! $seo && Sitepulse_Guard_By_Plugin_Pros_Settings::get_path( 'schema.enabled', true ),
 			'provider_name' => $this->active_seo_label(),
 		);
 	}
@@ -224,7 +224,7 @@ class Aicite_Guard_Schema {
 		 *
 		 * @param array $graph Schema.org nodes.
 		 */
-		$graph = apply_filters( 'aicite_guard_schema_graph', $graph );
+		$graph = apply_filters( 'spg_by_ppros_schema_graph', $graph );
 
 		return array_values( array_filter( $graph ) );
 	}

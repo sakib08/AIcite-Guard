@@ -2,7 +2,7 @@
 /**
  * Settings storage and sanitization.
  *
- * @package Aicite_Guard
+ * @package Sitepulse_Guard_By_Plugin_Pros
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -12,10 +12,61 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Single-option settings helper.
  */
-class Aicite_Guard_Settings {
+class Sitepulse_Guard_By_Plugin_Pros_Settings {
 
-	const OPTION_KEY = 'aicite_guard_options';
-	const AI_KEY     = 'aicite_guard_ai_key';
+	const OPTION_KEY = 'spg_by_ppros_options';
+
+	/**
+	 * Copy options stored under the previous long prefix.
+	 *
+	 * @return void
+	 */
+	public static function migrate_legacy_keys() {
+		static $done = false;
+		if ( $done ) {
+			return;
+		}
+		$done = true;
+
+		$map = array(
+			'sitepulse_guard_by_plugin_pros_options'                 => 'spg_by_ppros_options',
+			'sitepulse_guard_by_plugin_pros_ai_key'                  => 'spg_by_ppros_ai_key',
+			'sitepulse_guard_by_plugin_pros_llms_cache'              => 'spg_by_ppros_llms_cache',
+			'sitepulse_guard_by_plugin_pros_llms_full_cache'         => 'spg_by_ppros_llms_full_cache',
+			'sitepulse_guard_by_plugin_pros_llms_generated_at'       => 'spg_by_ppros_llms_generated_at',
+			'sitepulse_guard_by_plugin_pros_a11y_report'             => 'spg_by_ppros_a11y_report',
+			'sitepulse_guard_by_plugin_pros_alt_suggestions'         => 'spg_by_ppros_alt_suggestions',
+			'sitepulse_guard_by_plugin_pros_health_report'           => 'spg_by_ppros_health_report',
+			'sitepulse_guard_by_plugin_pros_ai_usage'                => 'spg_by_ppros_ai_usage',
+			'sitepulse_guard_by_plugin_pros_do_activation_redirect' => 'spg_by_ppros_do_activation_redirect',
+			'sitepulse_guard_by_plugin_pros_scores'                  => 'spg_by_ppros_scores',
+			'sitepulse_guard_by_plugin_pros_physical_files'          => 'spg_by_ppros_physical_files',
+		);
+
+		foreach ( $map as $old => $new ) {
+			if ( false !== get_option( $new, false ) ) {
+				continue;
+			}
+
+			$value = get_option( $old, false );
+			if ( false === $value ) {
+				continue;
+			}
+
+			update_option( $new, $value, false );
+			delete_option( $old );
+		}
+
+		global $wpdb;
+		$meta = array(
+			'_sitepulse_guard_by_plugin_pros_a11y_score'  => '_spg_by_ppros_a11y_score',
+			'_sitepulse_guard_by_plugin_pros_a11y_issues' => '_spg_by_ppros_a11y_issues',
+		);
+
+		foreach ( $meta as $old => $new ) {
+			$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_key = %s WHERE meta_key = %s", $new, $old ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+		}
+	}
 
 	/**
 	 * Default settings.
@@ -51,7 +102,7 @@ class Aicite_Guard_Settings {
 				'enabled' => true,
 			),
 			'ai'              => array(
-				'provider' => 'none',
+				'enabled' => true,
 			),
 		);
 	}
@@ -62,6 +113,7 @@ class Aicite_Guard_Settings {
 	 * @return array<string, mixed>
 	 */
 	public static function get() {
+		self::migrate_legacy_keys();
 		$stored = get_option( self::OPTION_KEY, array() );
 		if ( ! is_array( $stored ) ) {
 			$stored = array();
@@ -151,45 +203,10 @@ class Aicite_Guard_Settings {
 		}
 
 		if ( isset( $input['ai'] ) && is_array( $input['ai'] ) ) {
-			$provider = isset( $input['ai']['provider'] ) ? sanitize_key( $input['ai']['provider'] ) : 'none';
-			$out['ai']['provider'] = in_array( $provider, array( 'none', 'openai' ), true ) ? $provider : 'none';
+			$out['ai']['enabled'] = ! empty( $input['ai']['enabled'] );
 		}
 
 		return $out;
-	}
-
-	/**
-	 * Store the optional AI key separately (not autoloaded).
-	 *
-	 * @param string $key API key.
-	 * @return void
-	 */
-	public static function set_ai_key( $key ) {
-		$key = is_string( $key ) ? trim( $key ) : '';
-		if ( '' === $key ) {
-			delete_option( self::AI_KEY );
-			return;
-		}
-		update_option( self::AI_KEY, sanitize_text_field( $key ), false );
-	}
-
-	/**
-	 * Retrieve the stored AI key.
-	 *
-	 * @return string
-	 */
-	public static function get_ai_key() {
-		$key = get_option( self::AI_KEY, '' );
-		return is_string( $key ) ? $key : '';
-	}
-
-	/**
-	 * Whether an API key is configured.
-	 *
-	 * @return bool
-	 */
-	public static function has_ai_key() {
-		return '' !== self::get_ai_key() && 'none' !== self::get_path( 'ai.provider', 'none' );
 	}
 
 	/**

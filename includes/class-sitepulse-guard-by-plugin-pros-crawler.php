@@ -2,7 +2,7 @@
 /**
  * AI crawler allow/block rules for robots.txt.
  *
- * @package Aicite_Guard
+ * @package Sitepulse_Guard_By_Plugin_Pros
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -12,25 +12,25 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Writes focused robots.txt rules for answer engines vs training scrapers.
  */
-class Aicite_Guard_Crawler {
+class Sitepulse_Guard_By_Plugin_Pros_Crawler {
 
 	/**
-	 * Append AIcite Guard rules to robots.txt.
+	 * Append SitePulse Guard rules to robots.txt.
 	 *
 	 * @param string $output Current robots.txt.
 	 * @param bool   $public Whether the blog is public.
 	 * @return string
 	 */
 	public function filter_robots( $output, $public ) {
-		if ( ! $public || ! Aicite_Guard_Settings::get_path( 'crawler.robots_integration', true ) ) {
+		if ( ! $public || ! Sitepulse_Guard_By_Plugin_Pros_Settings::get_path( 'crawler.robots_integration', true ) ) {
 			return $output;
 		}
 
 		$lines   = array();
 		$lines[] = '';
-		$lines[] = '# AIcite Guard — AI crawler control';
+		$lines[] = '# SitePulse Guard — AI crawler control';
 
-		if ( Aicite_Guard_Settings::get_path( 'crawler.allow_answer_engines', true ) ) {
+		if ( Sitepulse_Guard_By_Plugin_Pros_Settings::get_path( 'crawler.allow_answer_engines', true ) ) {
 			$lines[] = '# Allow answer / citation engines';
 			foreach ( $this->answer_engines() as $bot ) {
 				$lines[] = 'User-agent: ' . $bot;
@@ -39,7 +39,7 @@ class Aicite_Guard_Crawler {
 			}
 		}
 
-		if ( Aicite_Guard_Settings::get_path( 'crawler.block_training', true ) ) {
+		if ( Sitepulse_Guard_By_Plugin_Pros_Settings::get_path( 'crawler.block_training', true ) ) {
 			$lines[] = '# Block known training-only scrapers';
 			foreach ( $this->training_scrapers() as $bot ) {
 				$lines[] = 'User-agent: ' . $bot;
@@ -105,9 +105,9 @@ class Aicite_Guard_Crawler {
 	 */
 	public function summary() {
 		return array(
-			'enabled'         => (bool) Aicite_Guard_Settings::get_path( 'crawler.robots_integration', true ),
-			'allow_engines'   => (bool) Aicite_Guard_Settings::get_path( 'crawler.allow_answer_engines', true ),
-			'block_training'  => (bool) Aicite_Guard_Settings::get_path( 'crawler.block_training', true ),
+			'enabled'         => (bool) Sitepulse_Guard_By_Plugin_Pros_Settings::get_path( 'crawler.robots_integration', true ),
+			'allow_engines'   => (bool) Sitepulse_Guard_By_Plugin_Pros_Settings::get_path( 'crawler.allow_answer_engines', true ),
+			'block_training'  => (bool) Sitepulse_Guard_By_Plugin_Pros_Settings::get_path( 'crawler.block_training', true ),
 			'answer_count'    => count( $this->answer_engines() ),
 			'training_count'  => count( $this->training_scrapers() ),
 			'robots_url'      => home_url( '/robots.txt' ),

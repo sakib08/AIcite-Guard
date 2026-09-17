@@ -2,7 +2,7 @@
 /**
  * Admin menus, settings, and AJAX.
  *
- * @package Aicite_Guard
+ * @package Sitepulse_Guard_By_Plugin_Pros
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WordPress admin integration.
  */
-class Aicite_Guard_Admin {
+class Sitepulse_Guard_By_Plugin_Pros_Admin {
 
 	/**
 	 * Register the top-level menu and screens.
@@ -20,25 +20,26 @@ class Aicite_Guard_Admin {
 	 * @return void
 	 */
 	public function add_menu() {
-		$cap = 'manage_options';
+		$cap  = 'manage_options';
+		$slug = SPG_BY_PPROS_SLUG;
 
 		add_menu_page(
-			__( 'AIcite Guard', 'aicite-guard' ),
-			__( 'AIcite Guard', 'aicite-guard' ),
+			__( 'SitePulse Guard', 'spg-by-ppros' ),
+			__( 'SitePulse Guard', 'spg-by-ppros' ),
 			$cap,
-			'aicite-guard',
+			$slug,
 			array( $this, 'render_dashboard' ),
 			'dashicons-shield-alt',
 			58
 		);
 
-		add_submenu_page( 'aicite-guard', __( 'Dashboard', 'aicite-guard' ), __( 'Dashboard', 'aicite-guard' ), $cap, 'aicite-guard', array( $this, 'render_dashboard' ) );
-		add_submenu_page( 'aicite-guard', __( 'AI Visibility', 'aicite-guard' ), __( 'AI Visibility', 'aicite-guard' ), $cap, 'aicite-guard-ai', array( $this, 'render_ai' ) );
-		add_submenu_page( 'aicite-guard', __( 'Accessibility', 'aicite-guard' ), __( 'Accessibility', 'aicite-guard' ), $cap, 'aicite-guard-a11y', array( $this, 'render_a11y' ) );
-		add_submenu_page( 'aicite-guard', __( 'Site Health', 'aicite-guard' ), __( 'Site Health', 'aicite-guard' ), $cap, 'aicite-guard-health', array( $this, 'render_health' ) );
-		add_submenu_page( 'aicite-guard', __( 'Settings', 'aicite-guard' ), __( 'Settings', 'aicite-guard' ), $cap, 'aicite-guard-settings', array( $this, 'render_settings' ) );
-		add_submenu_page( 'aicite-guard', __( 'Setup Wizard', 'aicite-guard' ), __( 'Setup Wizard', 'aicite-guard' ), $cap, 'aicite-guard-wizard', array( $this, 'render_wizard' ) );
-		add_submenu_page( 'aicite-guard', __( 'Go Pro', 'aicite-guard' ), __( 'Go Pro', 'aicite-guard' ), $cap, 'aicite-guard-pro', array( $this, 'render_pro' ) );
+		add_submenu_page( $slug, __( 'Dashboard', 'spg-by-ppros' ), __( 'Dashboard', 'spg-by-ppros' ), $cap, $slug, array( $this, 'render_dashboard' ) );
+		add_submenu_page( $slug, __( 'AI Visibility', 'spg-by-ppros' ), __( 'AI Visibility', 'spg-by-ppros' ), $cap, $slug . '-ai', array( $this, 'render_ai' ) );
+		add_submenu_page( $slug, __( 'Accessibility', 'spg-by-ppros' ), __( 'Accessibility', 'spg-by-ppros' ), $cap, $slug . '-a11y', array( $this, 'render_a11y' ) );
+		add_submenu_page( $slug, __( 'Site Health', 'spg-by-ppros' ), __( 'Site Health', 'spg-by-ppros' ), $cap, $slug . '-health', array( $this, 'render_health' ) );
+		add_submenu_page( $slug, __( 'Settings', 'spg-by-ppros' ), __( 'Settings', 'spg-by-ppros' ), $cap, $slug . '-settings', array( $this, 'render_settings' ) );
+		add_submenu_page( $slug, __( 'Setup Wizard', 'spg-by-ppros' ), __( 'Setup Wizard', 'spg-by-ppros' ), $cap, $slug . '-wizard', array( $this, 'render_wizard' ) );
+		add_submenu_page( $slug, __( 'Go Pro', 'spg-by-ppros' ), __( 'Go Pro', 'spg-by-ppros' ), $cap, $slug . '-pro', array( $this, 'render_pro' ) );
 	}
 
 	/**
@@ -48,8 +49,8 @@ class Aicite_Guard_Admin {
 	 */
 	public function register_settings() {
 		register_setting(
-			'aicite_guard_settings',
-			Aicite_Guard_Settings::OPTION_KEY,
+			'spg_by_ppros_settings',
+			Sitepulse_Guard_By_Plugin_Pros_Settings::OPTION_KEY,
 			array(
 				'type'              => 'array',
 				'sanitize_callback' => array( $this, 'sanitize_posted_settings' ),
@@ -59,13 +60,13 @@ class Aicite_Guard_Admin {
 	}
 
 	/**
-	 * Sanitize the settings form, including the separate API key field.
+	 * Sanitize the settings form.
 	 *
 	 * @param mixed $input Raw option.
 	 * @return array<string, mixed>
 	 */
 	public function sanitize_posted_settings( $input ) {
-		$current = Aicite_Guard_Settings::get();
+		$current = Sitepulse_Guard_By_Plugin_Pros_Settings::get();
 		if ( ! is_array( $input ) ) {
 			$input = array();
 		}
@@ -90,19 +91,12 @@ class Aicite_Guard_Admin {
 		$merged['accessibility']['statement_page']  = isset( $current['accessibility']['statement_page'] ) ? $current['accessibility']['statement_page'] : 0;
 
 		$merged['health']['enabled'] = ! empty( $input['health']['enabled'] );
-		$merged['ai']['provider']    = isset( $input['ai']['provider'] ) ? $input['ai']['provider'] : 'none';
+		$merged['ai']['enabled']     = ! empty( $input['ai']['enabled'] );
 		$merged['wizard_complete']   = ! empty( $current['wizard_complete'] );
 
-		if ( isset( $_POST['aicite_guard_ai_key'] ) && isset( $_POST['_wpnonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'aicite_guard_settings-options' ) ) {
-			$key = sanitize_text_field( wp_unslash( $_POST['aicite_guard_ai_key'] ) );
-			if ( '********' !== $key ) {
-				Aicite_Guard_Settings::set_ai_key( $key );
-			}
-		}
+		add_settings_error( 'spg_by_ppros_settings', 'spg_by_ppros_saved', __( 'Settings saved.', 'spg-by-ppros' ), 'updated' );
 
-		add_settings_error( 'aicite_guard_settings', 'aicite_guard_saved', __( 'Settings saved.', 'aicite-guard' ), 'updated' );
-
-		return Aicite_Guard_Settings::sanitize( $merged );
+		return Sitepulse_Guard_By_Plugin_Pros_Settings::sanitize( $merged );
 	}
 
 	/**
@@ -111,11 +105,11 @@ class Aicite_Guard_Admin {
 	 * @return void
 	 */
 	public function maybe_redirect_wizard() {
-		if ( ! get_option( 'aicite_guard_do_activation_redirect' ) ) {
+		if ( ! get_option( 'spg_by_ppros_do_activation_redirect' ) ) {
 			return;
 		}
 
-		delete_option( 'aicite_guard_do_activation_redirect' );
+		delete_option( 'spg_by_ppros_do_activation_redirect' );
 
 		if ( wp_doing_ajax() || is_network_admin() || ! current_user_can( 'manage_options' ) ) {
 			return;
@@ -125,7 +119,7 @@ class Aicite_Guard_Admin {
 			return;
 		}
 
-		wp_safe_redirect( admin_url( 'admin.php?page=aicite-guard-wizard' ) );
+		wp_safe_redirect( admin_url( 'admin.php?page=spg-by-ppros-wizard' ) );
 		exit;
 	}
 
@@ -136,37 +130,37 @@ class Aicite_Guard_Admin {
 	 * @return void
 	 */
 	public function enqueue_assets( $hook ) {
-		if ( strpos( $hook, 'aicite-guard' ) === false ) {
+		if ( strpos( $hook, SPG_BY_PPROS_SLUG ) === false ) {
 			return;
 		}
 
 		wp_enqueue_style(
-			'aicite-guard-admin',
-			AICITE_GUARD_URL . 'admin/css/aicite-guard-admin.css',
+			'spg-by-ppros-admin',
+			SPG_BY_PPROS_URL . 'admin/css/spg-by-ppros-admin.css',
 			array(),
-			AICITE_GUARD_VERSION
+			SPG_BY_PPROS_VERSION
 		);
 
 		wp_enqueue_script(
-			'aicite-guard-admin',
-			AICITE_GUARD_URL . 'admin/js/aicite-guard-admin.js',
+			'spg-by-ppros-admin',
+			SPG_BY_PPROS_URL . 'admin/js/spg-by-ppros-admin.js',
 			array(),
-			AICITE_GUARD_VERSION,
+			SPG_BY_PPROS_VERSION,
 			true
 		);
 
 		wp_localize_script(
-			'aicite-guard-admin',
-			'aiciteGuardAdmin',
+			'spg-by-ppros-admin',
+			'spgByPprosAdmin',
 			array(
 				'ajax'  => admin_url( 'admin-ajax.php' ),
-				'nonce' => wp_create_nonce( 'aicite_guard_admin' ),
+				'nonce' => wp_create_nonce( 'spg_by_ppros_admin' ),
 				'i18n'  => array(
-					'working'   => __( 'Working…', 'aicite-guard' ),
-					'done'      => __( 'Done.', 'aicite-guard' ),
-					'error'     => __( 'Something went wrong. Please try again.', 'aicite-guard' ),
-					'applied'   => __( 'Applied.', 'aicite-guard' ),
-					'confirm'   => __( 'Apply this alt text to the media library?', 'aicite-guard' ),
+					'working'   => __( 'Working…', 'spg-by-ppros' ),
+					'done'      => __( 'Done.', 'spg-by-ppros' ),
+					'error'     => __( 'Something went wrong. Please try again.', 'spg-by-ppros' ),
+					'applied'   => __( 'Applied.', 'spg-by-ppros' ),
+					'confirm'   => __( 'Apply this alt text to the media library?', 'spg-by-ppros' ),
 				),
 			)
 		);
@@ -180,8 +174,8 @@ class Aicite_Guard_Admin {
 	 */
 	public function action_links( $links ) {
 		$custom = array(
-			'<a href="' . esc_url( admin_url( 'admin.php?page=aicite-guard' ) ) . '">' . esc_html__( 'Dashboard', 'aicite-guard' ) . '</a>',
-			'<a href="' . esc_url( admin_url( 'admin.php?page=aicite-guard-settings' ) ) . '">' . esc_html__( 'Settings', 'aicite-guard' ) . '</a>',
+			'<a href="' . esc_url( admin_url( 'admin.php?page=spg-by-ppros' ) ) . '">' . esc_html__( 'Dashboard', 'spg-by-ppros' ) . '</a>',
+			'<a href="' . esc_url( admin_url( 'admin.php?page=spg-by-ppros-settings' ) ) . '">' . esc_html__( 'Settings', 'spg-by-ppros' ) . '</a>',
 		);
 
 		return array_merge( $custom, $links );
@@ -258,21 +252,21 @@ class Aicite_Guard_Admin {
 	 */
 	private function render_view( $view ) {
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'You do not have permission to access this page.', 'aicite-guard' ) );
+			wp_die( esc_html__( 'You do not have permission to access this page.', 'spg-by-ppros' ) );
 		}
 
-		$settings = Aicite_Guard_Settings::get();
-		$scores   = get_option( 'aicite_guard_scores', array() );
+		$settings = Sitepulse_Guard_By_Plugin_Pros_Settings::get();
+		$scores   = get_option( 'spg_by_ppros_scores', array() );
 		$scores   = is_array( $scores ) ? $scores : array();
-		$file     = AICITE_GUARD_PATH . 'admin/views/' . $view . '.php';
+		$file     = SPG_BY_PPROS_PATH . 'admin/views/' . $view . '.php';
 
 		if ( ! is_readable( $file ) ) {
 			return;
 		}
 
-		include AICITE_GUARD_PATH . 'admin/views/partials-header.php';
+		include SPG_BY_PPROS_PATH . 'admin/views/partials-header.php';
 		include $file;
-		include AICITE_GUARD_PATH . 'admin/views/partials-footer.php';
+		include SPG_BY_PPROS_PATH . 'admin/views/partials-footer.php';
 	}
 
 	/**
@@ -283,9 +277,9 @@ class Aicite_Guard_Admin {
 	public function ajax_regenerate_llms() {
 		$this->assert_ajax();
 
-		$llms   = new Aicite_Guard_Llms();
+		$llms   = new Sitepulse_Guard_By_Plugin_Pros_Llms();
 		$files  = $llms->regenerate();
-		$scorer = new Aicite_Guard_Ai_Score();
+		$scorer = new Sitepulse_Guard_By_Plugin_Pros_Ai_Score();
 		$score  = $scorer->calculate();
 
 		wp_send_json_success(
@@ -306,7 +300,7 @@ class Aicite_Guard_Admin {
 	public function ajax_scan_a11y() {
 		$this->assert_ajax();
 
-		$scanner = new Aicite_Guard_Accessibility();
+		$scanner = new Sitepulse_Guard_By_Plugin_Pros_Accessibility();
 		$report  = $scanner->scan();
 
 		wp_send_json_success( $report );
@@ -321,7 +315,7 @@ class Aicite_Guard_Admin {
 		$this->assert_ajax();
 
 		$id = isset( $_POST['attachment_id'] ) ? absint( wp_unslash( $_POST['attachment_id'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- verified in assert_ajax().
-		$scanner = new Aicite_Guard_Accessibility();
+		$scanner = new Sitepulse_Guard_By_Plugin_Pros_Accessibility();
 		$result  = $scanner->generate_alt( $id );
 
 		if ( is_wp_error( $result ) ) {
@@ -331,7 +325,7 @@ class Aicite_Guard_Admin {
 		wp_send_json_success(
 			array(
 				'alt'       => $result,
-				'remaining' => Aicite_Guard_Ai::remaining(),
+				'remaining' => Sitepulse_Guard_By_Plugin_Pros_Ai::remaining(),
 			)
 		);
 	}
@@ -347,7 +341,7 @@ class Aicite_Guard_Admin {
 		$id  = isset( $_POST['attachment_id'] ) ? absint( wp_unslash( $_POST['attachment_id'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- verified in assert_ajax().
 		$alt = isset( $_POST['alt'] ) ? sanitize_text_field( wp_unslash( $_POST['alt'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- verified in assert_ajax().
 
-		$scanner = new Aicite_Guard_Accessibility();
+		$scanner = new Sitepulse_Guard_By_Plugin_Pros_Accessibility();
 		$result  = $scanner->apply_alt( $id, $alt );
 
 		if ( is_wp_error( $result ) ) {
@@ -365,7 +359,7 @@ class Aicite_Guard_Admin {
 	public function ajax_statement() {
 		$this->assert_ajax();
 
-		$scanner = new Aicite_Guard_Accessibility();
+		$scanner = new Sitepulse_Guard_By_Plugin_Pros_Accessibility();
 		$result  = $scanner->generate_statement_page();
 
 		if ( is_wp_error( $result ) ) {
@@ -389,7 +383,7 @@ class Aicite_Guard_Admin {
 	public function ajax_refresh_health() {
 		$this->assert_ajax();
 
-		$health = new Aicite_Guard_Health();
+		$health = new Sitepulse_Guard_By_Plugin_Pros_Health();
 		wp_send_json_success( $health->report( true ) );
 	}
 
@@ -408,17 +402,17 @@ class Aicite_Guard_Admin {
 		}
 
 		$payload['wizard_complete'] = true;
-		Aicite_Guard_Settings::update( $payload );
+		Sitepulse_Guard_By_Plugin_Pros_Settings::update( $payload );
 
-		$llms = new Aicite_Guard_Llms();
+		$llms = new Sitepulse_Guard_By_Plugin_Pros_Llms();
 		$llms->regenerate();
 
-		$score = new Aicite_Guard_Ai_Score();
+		$score = new Sitepulse_Guard_By_Plugin_Pros_Ai_Score();
 		$score->calculate();
 
 		wp_send_json_success(
 			array(
-				'redirect' => admin_url( 'admin.php?page=aicite-guard' ),
+				'redirect' => admin_url( 'admin.php?page=spg-by-ppros' ),
 			)
 		);
 	}
@@ -430,10 +424,10 @@ class Aicite_Guard_Admin {
 	 */
 	private function assert_ajax() {
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'aicite-guard' ) ), 403 );
+			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'spg-by-ppros' ) ), 403 );
 		}
 
-		check_ajax_referer( 'aicite_guard_admin', 'nonce' );
+		check_ajax_referer( 'spg_by_ppros_admin', 'nonce' );
 	}
 
 	/**
